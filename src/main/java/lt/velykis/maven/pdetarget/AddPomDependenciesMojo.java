@@ -214,7 +214,7 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
    * 
    * @param doc
    * @param artifact
-   * @return
+   * @return XML Element for artifact location
    * @throws IOException
    */
   private Element createMavenArtifactLocation(Document doc, String artifactDir) 

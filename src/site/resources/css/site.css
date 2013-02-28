@@ -1,0 +1,16 @@
+body {
+	background-image:url(../images/bg.png);
+}
+
+.navbar.affix {
+top: 50px;
+}
+
+
+/*h1, */h2 {
+  margin-top: 30px;
+}
+
+h3, h4, h5, h6 {
+  margin-top: 20px;
+}
