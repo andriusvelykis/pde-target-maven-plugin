@@ -258,7 +258,7 @@
   </scm>
   <issueManagement>
     <system>GitHub</system>
-    <url>http://github.com/andriusvelykis/pde-target-maven-plugin/issues</url>
+    <url>http://github.com/andriusvelykis/pde-target-maven-plugin/issues/</url>
   </issueManagement>
 
   <licenses>
