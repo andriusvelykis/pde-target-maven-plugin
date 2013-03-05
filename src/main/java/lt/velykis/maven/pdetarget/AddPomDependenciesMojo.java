@@ -17,22 +17,33 @@
 package lt.velykis.maven.pdetarget;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.dependency.AbstractDependencyFilterMojo;
+import org.apache.maven.plugin.dependency.utils.DependencyUtil;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.artifact.AttachedArtifact;
 import org.apache.maven.shared.artifact.filter.collection.AbstractArtifactsFilter;
 import org.apache.maven.shared.artifact.filter.collection.ArtifactFilterException;
 import org.apache.maven.shared.artifact.filter.collection.ArtifactsFilter;
@@ -195,13 +206,15 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
 
 
   private Set<String> getArtifactDirs(Collection<? extends Artifact> artifacts)
-      throws IOException {
+      throws IOException, MojoFailureException {
     
     Set<String> artifactDirs = new LinkedHashSet<String>();
     for (Artifact artifact : artifacts) {
       File artifactFile = artifact.getFile();
       String artifactDir = artifactFile.getParentFile().getCanonicalPath();
       artifactDirs.add(artifactDir);
+      
+      createSourceBundle(artifact);
     }
     
     return artifactDirs;
@@ -268,6 +281,144 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
 
     // add to the root of build directory
     return new File(buildDirectory, outputDefinitionName);
+  }
+  
+  
+  private static String BUNDLE_ID_KEY = "Bundle-SymbolicName";
+  private static String BUNDLE_VERSION_KEY = "Bundle-Version";
+  private static String BUNDLE_VENDOR_KEY = "Bundle-Vendor";
+  private static String BUNDLE_NAME_KEY = "Bundle-Name";
+  
+  private void createSourceBundle(Artifact artifact) throws IOException, MojoFailureException {
+    
+    File sourcesFile = getSourcesFile(artifact);
+    if (!sourcesFile.exists()) {
+      this.getLog().warn(
+          "Sources jar is missing for artifact "
+          + ArtifactUtils.key(artifact) + " at " + sourcesFile);
+      return;
+    }
+    
+    File sourcesBundleFile = getSourceBundleFile(sourcesFile);
+    if (sourcesBundleFile.exists()) {
+      this.getLog().info(
+          "Skipping: sources bundle already generated for artifact "
+          + ArtifactUtils.key(artifact) + " at " + sourcesBundleFile);
+    }
+    
+    // read bundle information from the artifact's manifest
+    File artifactFile = artifact.getFile();
+    
+    JarFile artifactJar = new JarFile(artifactFile);
+    Manifest manifest = artifactJar.getManifest();
+    if (manifest == null) {
+      throw new MojoFailureException("Manifest is missing for artifact " + artifactFile);
+    }
+    
+    Attributes attrs = manifest.getMainAttributes();
+    String bundleId = attrs.getValue(BUNDLE_ID_KEY);
+    String bundleVersion = attrs.getValue(BUNDLE_VERSION_KEY);
+    String bundleVendor = attrs.getValue(BUNDLE_VENDOR_KEY);
+    String bundleName = attrs.getValue(BUNDLE_NAME_KEY);
+    
+    
+    if (bundleId == null) {
+      this.getLog().warn("Bundle symbolic name cannot be resolved for " + ArtifactUtils.key(artifact));
+      return;
+    }
+    
+    if (bundleVersion == null) {
+      this.getLog().warn("Bundle version cannot be resolved for " + ArtifactUtils.key(artifact));
+      return;
+    }
+    
+
+    // copy manifest from sources jar and add OSGI information
+    JarFile sourceJar = new JarFile(sourcesFile);
+    Manifest sourceManifest = sourceJar.getManifest();
+    
+    if (sourceManifest == null) {
+      sourceManifest = new Manifest();
+    }
+    
+    // adapt OSGI information from the original artifact
+    Attributes sourceAttrs = sourceManifest.getMainAttributes();
+    sourceAttrs.putValue(BUNDLE_ID_KEY, bundleId + ".source");
+    sourceAttrs.putValue(BUNDLE_VERSION_KEY, bundleVersion);
+    sourceAttrs.putValue("Bundle-ManifestVersion", "2");
+    
+    if (bundleVendor != null) {
+      sourceAttrs.putValue(BUNDLE_VENDOR_KEY, bundleVendor);
+    }
+    
+    if (bundleName != null) {
+      sourceAttrs.putValue(BUNDLE_NAME_KEY, bundleName + " Source");
+    }
+    
+    // mark this bundle as a source for the main artifact
+    String sourceRef = bundleId + ";version=\"" + bundleVersion + "\";roots:=\".\"";
+    sourceAttrs.putValue("Eclipse-SourceBundle", sourceRef);
+    
+    // copy JAR file contents with the new manifest
+    copyJarFile(sourceJar, sourceManifest, sourcesBundleFile);
+  }
+  
+  private File getSourcesFile(Artifact artifact) {
+    // resolve sources as attached artifact
+    Artifact sourceArtifact = new AttachedArtifact(
+        artifact, "jar", "sources", artifact.getArtifactHandler());
+    String sourceArtifactFileName = DependencyUtil.getFormattedFileName(sourceArtifact, false);
+
+    return new File(artifact.getFile().getParentFile(), sourceArtifactFileName);
+  }
+  
+  private File getSourceBundleFile(File sourceFile) {
+    String sourceFileName = sourceFile.getName();
+    if (sourceFileName.endsWith(".jar")) {
+      sourceFileName = sourceFileName.substring(0, sourceFileName.length() - 4);
+    }
+    
+    String sourceBundleName = sourceFileName + "-bundle.jar";
+    return new File(sourceFile.getParentFile(), sourceBundleName);
+  }
+  
+  /**
+   * Copies JAR contents with new Manifest file.
+   * 
+   * Adapted from http://javahowto.blogspot.co.uk/2011/07/how-to-programmatically-copy-jar-files.html
+   */
+  private static void copyJarFile(JarFile jarFile, Manifest manifest, File destFile)
+      throws IOException {
+
+    JarOutputStream jos = new JarOutputStream(new FileOutputStream(destFile), manifest);
+    Enumeration<JarEntry> entries = jarFile.entries();
+
+    try {
+      while (entries.hasMoreElements()) {
+        JarEntry entry = entries.nextElement();
+        
+        if ("META-INF/MANIFEST.MF".equals(entry.getName())) {
+          // skip manifest - a new one is used
+          continue;
+        }
+        
+        InputStream is = jarFile.getInputStream(entry);
+
+        // jos.putNextEntry(entry);
+        // create a new entry to avoid ZipException: invalid entry compressed size
+        jos.putNextEntry(new JarEntry(entry.getName()));
+        byte[] buffer = new byte[4096];
+        int bytesRead = 0;
+        while ((bytesRead = is.read(buffer)) != -1) {
+          jos.write(buffer, 0, bytesRead);
+        }
+        is.close();
+        jos.flush();
+        jos.closeEntry();
+      }
+    } finally {
+      jos.close();
+    }
   }
   
   
