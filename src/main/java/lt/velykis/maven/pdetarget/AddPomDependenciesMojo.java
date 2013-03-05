@@ -40,6 +40,7 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 import org.sonatype.plexus.build.incremental.DefaultBuildContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -170,13 +171,14 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
     }
 
     Element locationsNode = (Element) nodes.item(0);
+    Node firstChild = locationsNode.getFirstChild();
 
     Collection<Artifact> pomDependencies = resolveDependencies();
     Set<String> artifactDirs = getArtifactDirs(pomDependencies);
 
     for (String dir : artifactDirs) {
       Element depLocationNode = createMavenArtifactLocation(doc, dir);
-      locationsNode.appendChild(depLocationNode);
+      locationsNode.insertBefore(depLocationNode, firstChild);
     }
 
     writeXmlFile(doc, outputXmlFile);
