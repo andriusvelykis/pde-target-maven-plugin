@@ -11,7 +11,7 @@
   <groupId>lt.velykis.maven</groupId>
   <artifactId>pde-target-maven-plugin</artifactId>
 
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>maven-plugin</packaging>
 
   <name>Eclipse PDE Target Definition Maven Plugin</name>
@@ -254,7 +254,7 @@
     <connection>scm:git:git@github.com:andriusvelykis/pde-target-maven-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:andriusvelykis/pde-target-maven-plugin.git</developerConnection>
     <url>http://github.com/andriusvelykis/pde-target-maven-plugin/tree/master</url>
-    <tag>HEAD</tag>
+    <tag>pde-target-maven-plugin-1.0.1</tag>
   </scm>
   <issueManagement>
     <system>GitHub</system>
