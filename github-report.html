@@ -8,7 +8,7 @@
 
 	<head>
 		<meta charset="UTF-8" />
-		<title>Issue Tracking | PDE target definition Maven plugin</title>
+		<title>GitHub Report | PDE target definition Maven plugin</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="description" content="" />
 		<meta http-equiv="content-language" content="en" />
@@ -18,6 +18,7 @@
 		<link href="./css/bootswatch.css" rel="stylesheet" />
 		<link href="./css/reflow-skin.css" rel="stylesheet" />
 		
+		<link href="http://yandex.st/highlightjs/7.3/styles/github.min.css" rel="stylesheet" />
 		
 		<link href="./css/lightbox.css" rel="stylesheet" />
 		
@@ -46,7 +47,7 @@
 		</script>
 		</head>
 
-	<body class="page-issue-tracking project-pde-target-maven-plugin" data-spy="scroll" data-offset="60" data-target="#toc-scroll-target">
+	<body class="page-github-report project-pde-target-maven-plugin" data-spy="scroll" data-offset="60" data-target="#toc-scroll-target">
 
 		<div class="navbar navbar-fixed-top">
 			<div class="navbar-inner">
@@ -91,6 +92,16 @@
 				</div>
 			</div>
 		</div>
+		<hr class="toc-separator" />
+		<div id="toc-bar" class="navbar">
+			<div class="navbar-inner">
+				<div id="toc-scroll-target" class="container">
+					<ul id="toc" class="nav">
+						<li class="toplevel"><a href="#GitHub_Report" title="GitHub Report">GitHub Report</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
 	</header>
 
 	<div class="main-body">
@@ -99,18 +110,37 @@
 			<div class="body-content">
 <div class="section"> 
  <div class="page-header">
-  <h2 id="Overview">Overview</h2>
+  <h2 id="GitHub_Report">GitHub Report</h2>
  </div> 
- <a name="Overview"></a> 
- <p>This project uses GitHub to manage its issues.</p> 
-</div> 
-<div class="section"> 
- <h2 id="Issue_Tracking">Issue Tracking</h2> 
- <a name="Issue_Tracking"></a> 
- <p>Issues, bugs, and feature requests should be submitted to the following issue tracking system for this project.</p> 
- <div class="source"> 
-  <pre><a class="externalLink" href="http://github.com/andriusvelykis/pde-target-maven-plugin/issues/">http://github.com/andriusvelykis/pde-target-maven-plugin/issues/</a></pre> 
- </div> 
+ <a name="GitHub_Report"></a> 
+ <table border="0" class="bodyTable table table-striped table-hover"> 
+  <thead> 
+   <tr class="a"> 
+    <th>#</th> 
+    <th>Type</th> 
+    <th>Summary</th> 
+    <th>Assignee</th> 
+    <th>Reporter</th> 
+    <th>Status</th> 
+    <th>Created</th> 
+    <th>Updated</th> 
+    <th>Fix Version</th> 
+   </tr> 
+  </thead> 
+  <tbody> 
+   <tr class="b"> 
+    <td><a class="externalLink" href="http://github.com/andriusvelykis/pde-target-maven-plugin/issues/1">1</a></td> 
+    <td>bug</td> 
+    <td>Put Maven locations to the top</td> 
+    <td>andriusvelykis</td> 
+    <td>andriusvelykis</td> 
+    <td>closed</td> 
+    <td>2013-03-05</td> 
+    <td>2013-03-05</td> 
+    <td>1.0.1</td> 
+   </tr> 
+  </tbody> 
+ </table> 
 </div>
 			</div>
 		</div>
@@ -173,33 +203,24 @@
 					<ul class="nav nav-list">
 						<li class="nav-header">Maven documentation</li>
 						<li>
-							<a href="project-info.html" title="Project Information">Project Information <i class="icon-chevron-down"></i></a>
+							<a href="project-info.html" title="Project Information">Project Information <i class="icon-chevron-right"></i></a>
+						</li>
+						<li>
+							<a href="project-reports.html" title="Project Reports">Project Reports <i class="icon-chevron-down"></i></a>
 							<ul class="nav nav-list">
 						<li>
-							<a href="project-summary.html" title="Project Summary">Project Summary </a>
-						</li>
-						<li>
-							<a href="license.html" title="Project License">Project License </a>
-						</li>
-						<li>
-							<a href="team-list.html" title="Project Team">Project Team </a>
-						</li>
-						<li>
-							<a href="source-repository.html" title="Source Repository">Source Repository </a>
+							<a href="changes-report.html" title="Changes Report">Changes Report </a>
 						</li>
 						<li class="active">
-							<a href="#" title="Issue Tracking">Issue Tracking </a>
+							<a href="#" title="GitHub Report">GitHub Report </a>
 						</li>
 						<li>
-							<a href="dependencies.html" title="Dependencies">Dependencies </a>
+							<a href="plugin-info.html" title="Plugin Documentation">Plugin Documentation </a>
 						</li>
 						<li>
-							<a href="plugins.html" title="Project Plugins">Project Plugins </a>
+							<a href="apidocs/index.html" title="JavaDocs">JavaDocs </a>
 						</li>
 							</ul>
-						</li>
-						<li>
-							<a href="project-reports.html" title="Project Reports">Project Reports <i class="icon-chevron-right"></i></a>
 						</li>
 					</ul>
 				</div>
@@ -240,6 +261,7 @@
 	<script src="./js/jquery.smooth-scroll.min.js"></script>
 	<!-- back button support for smooth scroll -->
 	<script src="./js/jquery.ba-bbq.min.js"></script>
+	<script src="http://yandex.st/highlightjs/7.3/highlight.min.js"></script>
 
 	<script src="./js/reflow-skin.js"></script>
 	
