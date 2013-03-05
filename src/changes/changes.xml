@@ -12,5 +12,10 @@
         Initial release of PDE target definition Maven plugin.
       </action>
     </release>
+    <release version="1.0.1" date="5 March 2013" description="Maintenance release: fixed issue #1.">
+      <action type="fix" dev="andriusvelykis" issue="1">
+        Fixed issue #1 (put new locations to the top).
+      </action>
+    </release>
   </body>
 </document>
