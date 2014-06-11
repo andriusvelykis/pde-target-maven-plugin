@@ -192,12 +192,15 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
    * @param p The project to examine
    * @param deps A set where dependencies will be added
    */
-  private void walkDependencies(MavenProject p, Set<Artifact> deps) {
+  @SuppressWarnings("unchecked")
+private void walkDependencies(MavenProject p, Set<Artifact> deps) {
     List<MavenProject> collected = p.getCollectedProjects();
     if (collected != null)
       for (MavenProject sub : collected)
         walkDependencies(sub, deps);
-    deps.addAll(p.getDependencyArtifacts());
+    Set<Artifact> newdeps = p.getDependencyArtifacts();
+    if (newdeps != null)
+    	deps.addAll(p.getDependencyArtifacts());
   }
 
   /**
@@ -219,8 +222,10 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
     Set<String> artifactDirs = new LinkedHashSet<String>();
     for (Artifact artifact : artifacts) {
       File artifactFile = artifact.getFile();
-      String artifactDir = artifactFile.getParentFile().getCanonicalPath();
-      artifactDirs.add(artifactDir);
+      if (artifactFile != null) {
+        String artifactDir = artifactFile.getParentFile().getCanonicalPath();
+        artifactDirs.add(artifactDir);
+      }
     }
     
     return artifactDirs;
