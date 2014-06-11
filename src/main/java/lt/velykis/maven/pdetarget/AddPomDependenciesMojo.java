@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -33,6 +34,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.artifact.filter.collection.AbstractArtifactsFilter;
 import org.apache.maven.shared.artifact.filter.collection.ArtifactFilterException;
 import org.apache.maven.shared.artifact.filter.collection.ArtifactsFilter;
@@ -184,6 +186,22 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
     writeXmlFile(doc, outputXmlFile);
   }
 
+  /**
+   * Recursively gathers project dependencies
+   *
+   * @param p The project to examine
+   * @param deps A set where dependencies will be added
+   */
+  @SuppressWarnings("unchecked")
+private void walkDependencies(MavenProject p, Set<Artifact> deps) {
+    List<MavenProject> collected = p.getCollectedProjects();
+    if (collected != null)
+      for (MavenProject sub : collected)
+        walkDependencies(sub, deps);
+    Set<Artifact> newdeps = p.getDependencyArtifacts();
+    if (newdeps != null)
+    	deps.addAll(p.getDependencyArtifacts());
+  }
 
   /**
    * Resolves Maven project dependencies.
@@ -192,7 +210,9 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
    * @throws MojoExecutionException 
    */
   private Collection<Artifact> resolveDependencies() throws MojoExecutionException {
-    return getResolvedDependencies(true);
+    HashSet<Artifact> deps = new HashSet<Artifact>();
+    walkDependencies(project, deps);
+    return deps;
   }
 
 
@@ -202,8 +222,10 @@ public class AddPomDependenciesMojo extends AbstractDependencyFilterMojo {
     Set<String> artifactDirs = new LinkedHashSet<String>();
     for (Artifact artifact : artifacts) {
       File artifactFile = artifact.getFile();
-      String artifactDir = artifactFile.getParentFile().getCanonicalPath();
-      artifactDirs.add(artifactDir);
+      if (artifactFile != null) {
+        String artifactDir = artifactFile.getParentFile().getCanonicalPath();
+        artifactDirs.add(artifactDir);
+      }
     }
     
     return artifactDirs;
